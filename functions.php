@@ -22,7 +22,7 @@ function polite_new_enqueue_scripts() {
     global $polite_theme_options;
     $polite_new_name_font_url   = esc_attr( $polite_theme_options['polite-font-family-url'] );  
 
-    wp_enqueue_style( 'polite-new-fonts', '//fonts.googleapis.com/css?family='.$polite_new_name_font_url );
+    wp_enqueue_style( 'polite-new-fonts', '//fonts.googleapis.com/css2?family='.$polite_new_name_font_url );
 
     $parent_style = 'polite-style-child';
     $polite_new_version = wp_get_theme(get_template())->get( 'Version' );
@@ -241,13 +241,13 @@ if (!function_exists('polite_new_google_fonts')) :
     function polite_new_google_fonts()
     {
         $polite_new_google_fonts = array(
-            'Muli' => 'Muli',
-            'Lato' => 'Lato',
+            'Mulish:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap' => 'Mulish',
+            'Lato:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap' => 'Lato',
             'Open+Sans' => 'Open Sans',
-            'Montserrat' => 'Montserrat',
-            'Alegreya:400,400italic,700,900' => 'Alegreya',
-            'Alex+Brush' => 'Alex Brush',
-            'Lora'=>'Lora'
+            'Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap' => 'Montserrat',
+            'Alegreya:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&display=swap' => 'Alegreya',
+            'Alex+Brush&display=swap' => 'Alex Brush',
+            'Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap'=>'Lora'
         );
         return apply_filters('polite_new_google_fonts', $polite_new_google_fonts);
     }
@@ -259,7 +259,7 @@ endif;
  */
 function polite_new_customizer_fonts()
 {
-    wp_enqueue_style('polite_new_customizer_fonts', 'https://fonts.googleapis.com/css?family=Muli|Lato|Open+Sans| Montserrat|Alegreya|Lora', array(), null);
+    wp_enqueue_style('polite_new_customizer_fonts', 'https://fonts.googleapis.com/css?family=Mulish|Lato|Open+Sans| Montserrat|Alegreya|Lora', array(), null);
 }
 
 add_action('customize_controls_print_styles', 'polite_new_customizer_fonts');
@@ -271,7 +271,7 @@ add_action(
         ?>
         <style>
             <?php
-            $arr = array( 'Muli','Lato','Open+Sans',' Montserrat','Alegreya', 'Lora');
+            $arr = array( 'Mulish','Lato','Open+Sans',' Montserrat','Alegreya', 'Lora');
 
             foreach ( $arr as $font ) {
                 $font_family = str_replace("+", " ", $font);
@@ -302,6 +302,7 @@ if (!function_exists('polite_new_dynamic_css')) :
             body,
             .entry-content p{ 
                 font-family:".$polite_font_body_family."; 
+                font-weight:normal;
             }";
         }
 
