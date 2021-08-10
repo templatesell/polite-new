@@ -21,7 +21,7 @@ A perfect theme for blog and magazine site. With masonry layout and multiple blo
 3. Click Activate to use your new theme right away.
 
 == Changelog ==
-= 1.0.0 - August 09 2021 =
+= 1.0.0 - August 10 2021 =
 * Initial Submission
 
 == Credits ==
@@ -32,7 +32,7 @@ Polite is free WordPress theme by, Template Sell.
 Polite is distributed under the terms of the GNU GPL v2 or later.
 
 == Screenshot Images [CCO License] ==
-Image for theme screenshot, Copyright Authentic Stock  
+Image for theme screenshot, Copyright Marcin Jozwiak
 License: CC0 1.0 Universal (CC0 1.0)
-Source: https://stocksnap.io/photo/woman-bathtub-CUGFVFAI24
+Source: https://stocksnap.io/photo/spain-vacation-MEOFXQL9UJ
 
