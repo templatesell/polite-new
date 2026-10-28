@@ -1,5 +1,14 @@
 <?php
 /**
+ * The child theme version, read from its own style.css so it cannot drift
+ * from the version WordPress shows.
+ */
+if ( ! defined( 'POLITE_NEW_VERSION' ) ) {
+	$polite_new_theme = wp_get_theme( get_stylesheet() );
+	define( 'POLITE_NEW_VERSION', $polite_new_theme->get( 'Version' ) );
+}
+
+/**
  * Recommended way to include parent theme styles.
  * (Please see http://codex.wordpress.org/Child_Themes#How_to_Create_a_Child_Theme)
  *
@@ -8,9 +17,26 @@
  * Loads the child theme textdomain.
  */
 function polite_new_load_language() {
-    load_child_theme_textdomain( 'polite-new' );
+    load_child_theme_textdomain( 'polite-new', get_stylesheet_directory() . '/languages' );
 }
 add_action( 'after_setup_theme', 'polite_new_load_language' );
+
+/**
+ * Child theme setup.
+ */
+function polite_new_setup() {
+	add_theme_support(
+		'custom-background',
+		apply_filters(
+			'polite_new_custom_background_args',
+			array(
+				'default-color' => 'ffffff',
+				'default-image' => '',
+			)
+		)
+	);
+}
+add_action( 'after_setup_theme', 'polite_new_setup' );
 
 /**
  * Enqueue Style for child theme.
@@ -18,17 +44,42 @@ add_action( 'after_setup_theme', 'polite_new_load_language' );
 add_action( 'wp_enqueue_scripts', 'polite_new_enqueue_scripts');
 function polite_new_enqueue_scripts() {
 
-        /*google font  */
-    global $polite_theme_options;
-    $polite_new_name_font_url   = esc_attr( $polite_theme_options['polite-font-family-url'] );  
+	$polite_new_parent_version = wp_get_theme( get_template() )->get( 'Version' );
 
-    wp_enqueue_style( 'polite-new-fonts', '//fonts.googleapis.com/css2?family='.$polite_new_name_font_url );
+	/*
+	 * The picker's faces, served from the theme. These used to be fetched
+	 * from fonts.googleapis.com on every page view, over a
+	 * protocol-relative URL and with no version - so WordPress appended
+	 * its own and the request carried a stray ver= parameter.
+	 */
+	wp_enqueue_style(
+		'polite-new-fonts',
+		get_stylesheet_directory_uri() . '/assets/fonts/fonts.css',
+		array(),
+		POLITE_NEW_VERSION
+	);
 
-    $parent_style = 'polite-style-child';
-    $polite_new_version = wp_get_theme(get_template())->get( 'Version' );
+	/*
+	 * The parent enqueues 'polite-style' with get_stylesheet_uri(), which on
+	 * a child install resolves to THIS theme's style.css - so without this
+	 * the parent's own stylesheet would never be requested. It was being
+	 * registered here already, but with no version at all, which makes
+	 * WordPress substitute its own: the parent sheet was served as
+	 * style.css?ver=7.1.
+	 */
+	wp_register_style(
+		'polite-style',
+		get_template_directory_uri() . '/style.css',
+		array(),
+		$polite_new_parent_version
+	);
 
-    wp_enqueue_style('polite-style', get_template_directory_uri() . '/style.css' );
-    wp_enqueue_style( 'polite-new-style', get_stylesheet_directory_uri() . '/style.css', array(), $polite_new_version );;
+	wp_enqueue_style(
+		'polite-new-style',
+		get_stylesheet_directory_uri() . '/style.css',
+		array( 'polite-style' ),
+		POLITE_NEW_VERSION
+	);
 }
 
 /**
@@ -205,17 +256,17 @@ if (!function_exists('polite_new_read_time')) :
      */
     function polite_new_read_time()
     {
-        $content = apply_filters('the_content', get_post_field('post_content'));
         $read_words = 200;
-        $decode_content = html_entity_decode($content);
-        $filter_shortcode = do_shortcode($decode_content);
-        $strip_tags = wp_strip_all_tags($filter_shortcode, true);
-        $count = str_word_count($strip_tags);
+        $content    = strip_shortcodes( get_post_field( 'post_content' ) );
+        $content    = wp_strip_all_tags( $content, true );
+        $strip_tags = html_entity_decode( $content, ENT_QUOTES, get_bloginfo( 'charset' ) );
+        $count      = str_word_count( $strip_tags );
         $word_per_min = (absint($count) / $read_words);
         $word_per_min = ceil($word_per_min);
 
         if (absint($word_per_min) > 0) {
-            $word_count_strings = sprintf(_n('%s Min Reading', '%s Min Reading', number_format_i18n($word_per_min), 'polite-new'), number_format_i18n($word_per_min));
+            /* translators: %s: number of minutes a post takes to read. */
+            $word_count_strings = sprintf( _n( '%s Min Reading', '%s Min Reading', $word_per_min, 'polite-new' ), number_format_i18n( $word_per_min ) );
             if ('post' == get_post_type()):
                 echo '<span class="min-read">';
                 echo esc_html($word_count_strings);
@@ -259,7 +310,12 @@ endif;
  */
 function polite_new_customizer_fonts()
 {
-    wp_enqueue_style('polite_new_customizer_fonts', 'https://fonts.googleapis.com/css?family=Mulish|Lato|Open+Sans| Montserrat|Alegreya|Lora', array(), null);
+    wp_enqueue_style(
+		'polite_new_customizer_fonts',
+		get_stylesheet_directory_uri() . '/assets/fonts/fonts.css',
+		array(),
+		POLITE_NEW_VERSION
+	);
 }
 
 add_action('customize_controls_print_styles', 'polite_new_customizer_fonts');
@@ -271,11 +327,15 @@ add_action(
         ?>
         <style>
             <?php
-            $arr = array( 'Mulish','Lato','Open+Sans',' Montserrat','Alegreya', 'Lora');
-
-            foreach ( $arr as $font ) {
-                $font_family = str_replace("+", " ", $font);
-                echo '.customize-control select option[value*="' . $font . '"] {font-family: ' . $font_family . '; font-size: 22px;}';
+            foreach ( array_keys( polite_new_google_fonts() ) as $polite_new_font ) {
+                /* Keys can carry css2 parameters: Family:ital,wght@... and &display=swap. */
+                $polite_new_family = preg_replace( '/[:&].*$/', '', $polite_new_font );
+                $polite_new_family = str_replace( '+', ' ', $polite_new_family );
+                printf(
+                    '.customize-control select option[value*="%1$s"] { font-family: "%2$s"; font-size: 22px; }',
+                    esc_attr( $polite_new_font ),
+                    esc_attr( $polite_new_family )
+                );
             }
             ?>
         </style>
@@ -291,9 +351,18 @@ if (!function_exists('polite_new_dynamic_css')) :
     {
         global $polite_theme_options;
         $polite_new_google_fonts = polite_new_google_fonts(); 
-        $polite_font_family = $polite_theme_options['polite-font-family-url'];       
+        $polite_font_family = isset( $polite_theme_options['polite-font-family-url'] )
+            ? $polite_theme_options['polite-font-family-url']
+            : '';
+
         /* Paragraph Font Options */
-        $polite_font_body_family = esc_attr($polite_new_google_fonts[$polite_font_family] );
+        if ( ! isset( $polite_new_google_fonts[ $polite_font_family ] ) ) {
+            $polite_new_defaults = polite_default_theme_options_values();
+            $polite_font_family = $polite_new_defaults['polite-font-family-url'];
+        }
+        $polite_font_body_family = isset( $polite_new_google_fonts[ $polite_font_family ] )
+            ? $polite_new_google_fonts[ $polite_font_family ]
+            : '';
 
         $custom_css = '';
         //Paragraph Font Options 

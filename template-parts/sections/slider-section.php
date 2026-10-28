@@ -22,6 +22,14 @@ $read_time = absint($polite_theme_options['polite-show-hide-read-time']);
             'dots'              => false,
             'arrows'            => false,
         );
+
+/*
+ * $slick_args was assembled and then never encoded: the markup below echoed
+ * $slick_args_encoded, a variable assigned nowhere, so data-slick was always
+ * empty and slick fell back to its own defaults - showing the arrows and dots
+ * this theme explicitly set to false.
+ */
+$slick_args_encoded = wp_json_encode( $slick_args );
       $args = array(
 			'posts_per_page' => 3,
 			'paged' => 1,
@@ -31,7 +39,7 @@ $read_time = absint($polite_theme_options['polite-show-hide-read-time']);
 		$slider_query = new WP_Query($args);
 		if ($slider_query->have_posts()): ?>
     <div class="container">
-    <div class="modern-slider" data-slick='<?php echo $slick_args_encoded; ?>'>
+    <div class="modern-slider" data-slick='<?php echo esc_attr( $slick_args_encoded ); ?>'>
 				<?php while ($slider_query->have_posts()) : $slider_query->the_post(); 
           if(has_post_thumbnail()){
           $image_id = get_post_thumbnail_id();

@@ -16,7 +16,7 @@ $date = absint($polite_theme_options['polite-show-hide-date']);
 $category = absint($polite_theme_options['polite-show-hide-category']);
 $author = absint($polite_theme_options['polite-show-hide-author']);
 $read_time = absint($polite_theme_options['polite-show-hide-read-time']);
-$has_content = ($show_content_from == 'content') ? 'has-content' : 'no-cotent';
+$has_content = ($show_content_from == 'content') ? 'has-content' : 'no-content';
 ?>
 <article id="post-<?php the_ID(); ?>" <?php post_class($masonry); ?>>
     <div class="post-wrap <?php echo esc_attr($image_location); ?> <?php echo esc_attr($has_content); ?>">
