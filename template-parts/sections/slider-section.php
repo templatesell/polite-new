@@ -23,12 +23,6 @@ $read_time = absint($polite_theme_options['polite-show-hide-read-time']);
             'arrows'            => false,
         );
 
-/*
- * $slick_args was assembled and then never encoded: the markup below echoed
- * $slick_args_encoded, a variable assigned nowhere, so data-slick was always
- * empty and slick fell back to its own defaults - showing the arrows and dots
- * this theme explicitly set to false.
- */
 $slick_args_encoded = wp_json_encode( $slick_args );
       $args = array(
 			'posts_per_page' => 3,
